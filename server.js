@@ -13,12 +13,15 @@ import cors from "cors";
 
 dotenv.config();
 
-
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+  })
+);
 
 const extractVideoId = (url) => {
   try {
@@ -32,8 +35,6 @@ const extractVideoId = (url) => {
     throw new Error("Invalid YouTube URL format");
   }
 };
-
-
 
 app.post("/api/analyze", async (req, res) => {
   try {
@@ -73,9 +74,7 @@ app.post("/api/analyze", async (req, res) => {
           );
         }
 
-        if (
-          ["positive", "negative", "neutral"].includes(sentiment)
-        ) {
+        if (["positive", "negative", "neutral"].includes(sentiment)) {
           sentiments[sentiment]++;
           analyzedCount++;
         } else {
