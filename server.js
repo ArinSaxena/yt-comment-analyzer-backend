@@ -26,7 +26,9 @@ app.use(
 const extractVideoId = (url) => {
   try {
     const urlObj = new URL(url);
-    const videoId = urlObj.searchParams.get("v");
+    const videoId =
+      urlObj.searchParams.get("v") ||
+      url.replace("https://youtu.be/", "").split("?")[0];
     if (!videoId) {
       throw new Error("No video ID found in URL");
     }
