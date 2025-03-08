@@ -9,22 +9,22 @@ if (!uri) {
   throw new Error("MongoDB URI is not defined in environment variables");
 }
 
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(uri);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => console.log("Connected to MongoDB"));
 
-const commentSchema = new mongoose.Schema({
-  commentId: { type: String, required: true, unique: true },
-  videoId: { type: String, required: true },
-  text: { type: String, required: true },
-  sentiment: { type: String, enum: ["positive", "negative", "neutral"]},
-  analyzedAt: { type: Date },
-}, { timestamps: true });
+const commentSchema = new mongoose.Schema(
+  {
+    commentId: { type: String, required: true, unique: true },
+    videoId: { type: String, required: true },
+    text: { type: String, required: true },
+    sentiment: { type: String, enum: ["positive", "negative", "neutral"] },
+    analyzedAt: { type: Date },
+  },
+  { timestamps: true }
+);
 
 const Comment = mongoose.model("Comment", commentSchema);
 
@@ -41,7 +41,7 @@ const storeCommentsInDB = async (comments) => {
 const fetchCommentsFromDB = async (videoId) => {
   try {
     let comments = await Comment.find({ videoId });
-    
+
     if (comments.length === 0) {
       console.log("No comments found in DB, fetching from YouTube...");
       comments = await fetchLatestCommentsFromYT(videoId);
@@ -73,7 +73,10 @@ const getSentimentFromDB = async (commentId) => {
 
 const updateCommentSentiment = async (commentId, sentiment) => {
   try {
-    await Comment.updateOne({ commentId }, { $set: { sentiment, analyzedAt: new Date() } });
+    await Comment.updateOne(
+      { commentId },
+      { $set: { sentiment, analyzedAt: new Date() } }
+    );
     console.log(`Updated sentiment for comment ${commentId}`);
   } catch (error) {
     console.error("Error updating comment sentiment:", error);
@@ -81,4 +84,9 @@ const updateCommentSentiment = async (commentId, sentiment) => {
   }
 };
 
-export { storeCommentsInDB, fetchCommentsFromDB, updateCommentSentiment, getSentimentFromDB };
+export {
+  storeCommentsInDB,
+  fetchCommentsFromDB,
+  updateCommentSentiment,
+  getSentimentFromDB,
+};
